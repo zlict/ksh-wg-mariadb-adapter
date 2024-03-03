@@ -1,3 +1,3 @@
-from .adapter import DBConnection, connect
+from adapter import DBConnection, connect
 
 __all__ = ['DBConnection', 'connect']

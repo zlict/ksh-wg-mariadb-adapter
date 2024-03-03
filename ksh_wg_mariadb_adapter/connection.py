@@ -2,7 +2,7 @@ import mysql.connector
 from mysql.connector import Error
 
 class DBConnection:
-  def __init__(self, connection):
+  def __init__(self, connection, debug=False):
     self.connection = connection
 
   def __exit__(self, exc_type, exc_val, exc_tb):
@@ -12,8 +12,8 @@ class DBConnection:
     try:
         self.connection.cursor().execute("SELECT 1")
         return True, None
-    except Error as e:
-        return False, str(e)
+    except Error as error:
+        return False, str(error)
 
   def tables(self):
     cursor = self.connection.cursor()
@@ -21,9 +21,9 @@ class DBConnection:
     return [table[0] for table in cursor.fetchall()]
 
   def sql(self, query):
+  	print(f"SQL: {query}") if self.debug
     cursor = self.connection.cursor(dictionary=True)
     cursor.execute(query)
-    print(f"SQL: {query}")
 
     try: 
       if query.lower().startswith("select"):
@@ -32,12 +32,6 @@ class DBConnection:
       else:
           self.connection.commit()
           return cursor.rowcount
-
-    except mysql.connector.errors.InterfaceError as error:
-      if error.msg == 'No result set to fetch from.':
-          pass
-      else:
-          raise 
       
 
   def select(self, table, where=None, order_by=None, limit=None, project="*"):
@@ -51,7 +45,35 @@ class DBConnection:
     
     return self.sql(query)
 
-def connect(host, username, password, database):
+  def upsert(self, query, row)
+  	print(f"SQL: {query}") if self.debug
+    values = tuple(row.values())
+    cursor = self.connection.cursor()
+    try:
+        cursor.execute(query, values)
+        self.connection.commit()
+        return cursor.rowcount
+    except Error as error:
+        print(f"Error: {error}")
+        return None
+
+  def insert(self, table, row):
+    columns = ', '.join(row.keys())
+    placeholders = ', '.join(['%s'] * len(row))
+    query = f"INSERT INTO {table} ({columns}) VALUES ({placeholders})"
+    return self.upsert(query, row)
+
+  def update(self, table, row, where=None):
+    set_clause = ', '.join([f"{key} = %s" for key in row.keys()])
+    query = f"UPDATE {table} SET {set_clause}"
+
+    if where:
+        query += f" WHERE {where}"
+
+    return self.upsert(query, row)
+    
+
+def connect(host, username, password, database, debug=False):
     try:
         connection = mysql.connector.connect(
             host=host,
@@ -61,7 +83,8 @@ def connect(host, username, password, database):
             consume_results=True
         )
         if connection.is_connected():
-            return DBConnection(connection)
-    except Error as e:
-        print(f"Error: {e}")
+            return DBConnection(connection, debug=debug)
+
+    except Error as error:
+        print(f"Error: {error}")
         return None
