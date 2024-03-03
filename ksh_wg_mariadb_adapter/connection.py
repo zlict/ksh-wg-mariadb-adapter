@@ -4,6 +4,7 @@ from mysql.connector import Error
 class DBConnection:
   def __init__(self, connection, debug=False):
     self.connection = connection
+    self.debug = debug
 
   def __exit__(self, exc_type, exc_val, exc_tb):
     self.connection.close()
@@ -72,19 +73,31 @@ class DBConnection:
 
     return self.upsert(query, row)
     
+  def delete(self, table, where=)
+    query = f"DELETE FROM {table} WHERE {where}"
+  	print(f"SQL: {query}") if self.debug
+    cursor = self.connection.cursor()
+    try:
+      cursor.execute(query)
+      self.connection.commit()
+      return cursor.rowcount
+    
+    except Error as error:
+      print(f"Error: {error}")
+      return None
 
 def connect(host, username, password, database, debug=False):
-    try:
-        connection = mysql.connector.connect(
-            host=host,
-            user=username,
-            password=password,
-            database=database,
-            consume_results=True
-        )
-        if connection.is_connected():
-            return DBConnection(connection, debug=debug)
+  try:
+    connection = mysql.connector.connect(
+      host=host,
+      user=username,
+      password=password,
+      database=database,
+      consume_results=True
+    )
+    if connection.is_connected():
+      return DBConnection(connection, debug=debug)
 
-    except Error as error:
-        print(f"Error: {error}")
-        return None
+  except Error as error:
+    print(f"Error: {error}")
+    return None
