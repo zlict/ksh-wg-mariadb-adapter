@@ -27,13 +27,12 @@ class DBConnection:
     cursor = self.connection.cursor(dictionary=True)
     cursor.execute(query)
 
-    try: 
-      if query.lower().startswith("select"):
-        result = cursor.fetchall()
-        return result
-      else:
-        self.connection.commit()
-        return cursor.rowcount
+    if query.lower().startswith("select"):
+      result = cursor.fetchall()
+      return result
+    else:
+      self.connection.commit()
+      return cursor.rowcount
 
   def select(self, table, where=None, order_by=None, limit=None, project="*"):
     query = f"SELECT {project} FROM {table}"
