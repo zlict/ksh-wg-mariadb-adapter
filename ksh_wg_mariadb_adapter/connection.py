@@ -45,7 +45,7 @@ class DBConnection:
     
     return self.sql(query)
 
-  def upsert(self, query, row)
+  def upsert(self, query, row):
     if self.debug: print(f"SQL: {query}")
     values = tuple(row.values())
     cursor = self.connection.cursor()
@@ -72,7 +72,7 @@ class DBConnection:
 
     return self.upsert(query, row)
     
-  def delete(self, table, where=)
+  def delete(self, table, where="1=0"):
     query = f"DELETE FROM {table} WHERE {where}"
     if self.debug: print(f"SQL: {query}")
     cursor = self.connection.cursor()
