@@ -1,3 +1,3 @@
-from connection import DBConnection, connect
+from .connection import DBConnection, connect
 
 __all__ = ['DBConnection', 'connect']
